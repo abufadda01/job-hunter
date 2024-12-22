@@ -3,6 +3,9 @@ const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const dotenv = require("dotenv")
 const connectDB = require("./controllers/connectDB")
+const errorHandler = require("./middlewares/errorHandler")
+
+const userRoutes = require("./routes/user.routes")
 
 
 dotenv.config()
@@ -16,6 +19,12 @@ app.use(express.urlencoded({extended : true}))
 app.use(cors({origin : process.env.UI_URL , credentials : true}))
 app.use(cookieParser())
 
+
+app.use("/api/v1/auth" , userRoutes)
+
+
+
+app.use(errorHandler)
 
 
 

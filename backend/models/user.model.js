@@ -1,4 +1,7 @@
 const mongoose = require("mongoose")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcrypt")
+
 
 
 const userSchema = new mongoose.Schema({
@@ -18,6 +21,7 @@ const userSchema = new mongoose.Schema({
     password : {
         type : String ,
         required : true ,
+        select : false
     },
     role : {
         type : String ,
@@ -37,6 +41,25 @@ const userSchema = new mongoose.Schema({
     }
 } , {timestamps : true})
 
+
+
+userSchema.pre("save" , async function(next){
+
+    if(!this.isModified("password")) {
+        next()
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(this.password , salt)
+    this.password = hashedPassword
+ 
+})
+
+
+
+userSchema.methods.signJWT = function(){
+    return jwt.sign({userId : this._id} , process.env.JWT_SECRET , {expiresIn : process.env.JWT_EXPIRE})
+}
 
 
 const User = mongoose.model("users" , userSchema)
